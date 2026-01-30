@@ -1,0 +1,55 @@
+name: Validate API Naming Policy (ADR-002)
+
+on:
+    pull_request:
+        paths:
+            - "src/MixingStation.Client/**"
+            - "openapi.json"
+            - "scripts/validate-api-naming.py"
+    push:
+        branches:
+            - master
+            - main
+        paths:
+            - "src/MixingStation.Client/**"
+            - "openapi.json"
+
+jobs:
+    validate-naming:
+        name: Enforce REST Naming Policy
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup .NET 8
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "8.0.x"
+
+            - name: Setup Python 3.11
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Build MixingStation.Client (Release)
+              run: dotnet build src/MixingStation.Client/MixingStation.Client.csproj --configuration Release --no-restore
+
+            - name: Validate API Naming Policy
+              run: |
+                  python scripts/validate-api-naming.py \
+                    --openapi openapi.json \
+                    --assembly src/MixingStation.Client/bin/Release/net8.0/MixingStation.Client.dll
+              continue-on-error: false
+
+            - name: Upload naming violations report
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: naming-violations
+                  path: naming-violations.txt
+                  retention-days: 7
