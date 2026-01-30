@@ -54,5 +54,15 @@ namespace MixingStation.Client.App
         /// <returns>Mixer info (consoleId, currentModel, firmwareVersion, ipAddress, etc.).</returns>
         Task<AppMixersCurrentResponse> GetMixersCurrentAsync(
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /app/state - Returns current application state and progress.
+        /// OpenAPI: Response blob-bw-a (msg, progress, state, topState)
+        /// Naming: /{group}/{segment} → Get{Segment}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Application state (msg, progress 0-100, state, topState).</returns>
+        Task<AppStateResponse> GetStateAsync(
+            CancellationToken cancellationToken = default);
     }
 }

@@ -41,6 +41,10 @@ namespace MixingStation.Client.App
     public class AppClient : IAppClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
         public AppClient(IHttpClientFactory httpClientFactory)
         {
@@ -134,6 +138,63 @@ namespace MixingStation.Client.App
             catch (TransportException)
             {
                 // Re-throw TransportException as-is
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppStateResponse> GetStateAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                // GET /app/state
+                var response = await httpClient.GetAsync("/app/state", cancellationToken)
+                    .ConfigureAwait(false);
+
+                // Check for HTTP errors
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode}: {errorContent}",
+                        response.StatusCode);
+                }
+
+                // Deserialize response
+                var result = await response.Content.ReadFromJsonAsync<AppStateResponse>(
+                    JsonOptions, cancellationToken).ConfigureAwait(false);
+
+                if (result == null)
+                {
+                    throw new TransportException("Failed to deserialize response: received null");
+                }
+
+                return result;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                // Re-throw TransportException as-is
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                // Re-throw cancellation as-is
                 throw;
             }
             catch (Exception ex)

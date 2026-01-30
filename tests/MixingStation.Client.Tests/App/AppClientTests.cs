@@ -376,4 +376,119 @@ public class AppClientTests
     }
 
     #endregion
+
+    // ========================================
+    // GetStateAsync Tests (GET /app/state)
+    // ========================================
+
+    [Fact]
+    public async Task GetStateAsync_WithValidResponse_ReturnsAppState()
+    {
+        // Arrange
+        var expectedResponse = new AppStateResponse
+        {
+            Msg = "Connecting to mixer",
+            Progress = 75,
+            State = "CONNECTING",
+            TopState = "RUNNING"
+        };
+
+        var jsonResponse = JsonSerializer.Serialize(expectedResponse, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        _httpMessageHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Method == HttpMethod.Get &&
+                    req.RequestUri!.ToString().EndsWith("/app/state")),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(jsonResponse)
+            });
+
+        var httpClient = new HttpClient(_httpMessageHandlerMock.Object)
+        {
+            BaseAddress = new Uri("http://localhost:8045/")
+        };
+        _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var client = new AppClient(_httpClientFactoryMock.Object);
+
+        // Act
+        var result = await client.GetStateAsync();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Msg.Should().Be("Connecting to mixer");
+        result.Progress.Should().Be(75);
+        result.State.Should().Be("CONNECTING");
+        result.TopState.Should().Be("RUNNING");
+    }
+
+    [Fact]
+    public async Task GetStateAsync_WithServerError_ThrowsTransportException()
+    {
+        // Arrange
+        _httpMessageHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent("Internal server error")
+            });
+
+        var httpClient = new HttpClient(_httpMessageHandlerMock.Object)
+        {
+            BaseAddress = new Uri("http://localhost:8045/")
+        };
+        _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var client = new AppClient(_httpClientFactoryMock.Object);
+
+        // Act
+        Func<Task> act = async () => await client.GetStateAsync();
+
+        // Assert
+        await act.Should().ThrowAsync<TransportException>()
+            .Where(ex => ex.StatusCode == HttpStatusCode.InternalServerError);
+    }
+
+    [Fact]
+    public async Task GetStateAsync_WithMalformedJson_ThrowsTransportException()
+    {
+        // Arrange
+        _httpMessageHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent("{ invalid }")
+            });
+
+        var httpClient = new HttpClient(_httpMessageHandlerMock.Object)
+        {
+            BaseAddress = new Uri("http://localhost:8045/")
+        };
+        _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var client = new AppClient(_httpClientFactoryMock.Object);
+
+        // Act
+        Func<Task> act = async () => await client.GetStateAsync();
+
+        // Assert
+        await act.Should().ThrowAsync<TransportException>()
+            .WithMessage("*Failed to deserialize*");
+    }
 }
