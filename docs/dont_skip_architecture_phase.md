@@ -1,4 +1,4 @@
-Yes — if you’re operating with a **phase-structured process (01…09)**, you should not let Copilot “jump” from requirements directly to implementation. The trick is to define a **minimal, mandatory Architecture Phase output** (“architecture mini-pack”) and then **enforce it mechanically** (PR templates + CI + Copilot instructions).
+
 
 Below is a pragmatic way to keep the project consistent without turning Phase 03 into a thesis.
 

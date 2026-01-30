@@ -124,15 +124,24 @@ Per **ADR-002** (issue #11), all public client methods MUST mirror REST endpoint
 
 **Exception**: Single-verb endpoints (no segment) → `{Verb}Async()`
 
-### 3.2 Phase 1 Endpoint Mapping
+### 3.2 Phase 1 Endpoint Mapping (REAL API from openapi.json)
 
-| REST Endpoint | HTTP Method | Derived Method Name | Interface | Implements Req |
-|---------------|-------------|---------------------|-----------|----------------|
-| `/app/connect` | POST | `ConnectAsync(AppConnectRequest)` | IAppClient | #4 REQ-F-001 |
-| `/app/mixers/current` | GET | `MixersCurrentAsync()` | IAppClient | #5 REQ-F-002 |
-| `/console/data` | GET | `DataAsync()` | IConsoleClient | #6 REQ-F-003 |
+| REST Endpoint | HTTP Method | OpenAPI Request/Response | Derived Method Name | Interface | Implements Req |
+|---------------|-------------|--------------------------|---------------------|-----------|----------------|
+| `/app/mixers/connect` | POST | blob-ca-b / 204 No Content | `PostMixersConnectAsync(AppMixersConnectRequest)` | IAppClient | #4 REQ-F-001 |
+| `/app/mixers/current` | GET | - / blob-ca-d$b | `GetMixersCurrentAsync()` | IAppClient | #5 REQ-F-002 |
+| `/console/data/get/{path}/{format}` | GET | - / blob-bx-m | `GetDataGetAsync(path, format)` | IConsoleClient | #6 REQ-F-003 |
+| `/console/information` | GET | - / blob-bx-b | `GetInformationAsync()` | IConsoleClient | #5 REQ-F-002 |
+
+**CRITICAL**: OpenAPI spec saved at `docs/openapi.json` as single source of truth.
 
 **CI Enforcement**: `scripts/validate-api-naming.py` validates compiled assembly against OpenAPI spec.
+
+**Key Differences from Initial Design**:
+- `/app/connect` → `/app/mixers/connect` (correct path)
+- Connect returns 204 No Content (NOT a response object)
+- Console data accessed via `/console/data/get/{path}/{format}` (NOT `/console/data`)
+- Properties use camelCase (NOT PascalCase) - must map in C# DTOs
 
 ### 3.3 Interface Contracts
 

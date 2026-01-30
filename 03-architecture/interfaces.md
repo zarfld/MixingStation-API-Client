@@ -106,39 +106,42 @@ namespace MixingStation.Client.App
     /// <summary>
     /// Client for MixingStation /app/* endpoints.
     /// Mirrors REST API structure (ADR-002).
+    /// Source: docs/openapi.json
     /// </summary>
     public interface IAppClient
     {
         /// <summary>
         /// GET /app/mixers/current
-        /// Retrieves currently connected mixer information.
+        /// Returns the meta-data of the currently used mixer.
+        /// OpenAPI: blob-ca-d$b response schema
         /// </summary>
-        /// <returns>Mixer metadata (series, model, IP, firmware)</returns>
+        /// <returns>Mixer metadata (consoleId, currentModel, firmwareVersion, ipAddress, etc.)</returns>
         /// <exception cref="MixingStationException">If not connected or API error</exception>
-        Task<MixerInfo> GetMixersCurrentAsync(CancellationToken ct = default);
+        Task<AppMixersCurrentResponse> GetMixersCurrentAsync(CancellationToken ct = default);
         
         /// <summary>
-        /// POST /app/connect
-        /// Establishes connection to MixingStation console.
+        /// POST /app/mixers/connect
+        /// Connects to the mixer with the given IP/Hostname and model id.
+        /// OpenAPI: blob-ca-b request (consoleId, ip), 204 No Content response
         /// </summary>
-        /// <param name="request">Connection parameters (IP, port, timeout)</param>
-        /// <returns>Connection result with status</returns>
+        /// <param name="request">Connection parameters (consoleId, ip)</param>
         /// <exception cref="MixingStationException">If connection fails</exception>
-        Task<ConnectResponse> ConnectAsync(ConnectRequest request, CancellationToken ct = default);
+        Task PostMixersConnectAsync(AppMixersConnectRequest request, CancellationToken ct = default);
         
         /// <summary>
-        /// POST /app/disconnect
-        /// Gracefully disconnects from console.
+        /// POST /app/mixers/disconnect
+        /// Stops the network stack and return to the initial app state.
+        /// OpenAPI: 204 No Content response
         /// </summary>
-        /// <returns>Disconnect confirmation</returns>
-        Task<DisconnectResponse> DisconnectAsync(CancellationToken ct = default);
+        Task PostMixersDisconnectAsync(CancellationToken ct = default);
         
         /// <summary>
-        /// GET /app/status
-        /// Retrieves current connection status and session info.
+        /// GET /app/state
+        /// Returns the current state of the app.
+        /// OpenAPI: blob-bw-a response schema
         /// </summary>
-        /// <returns>Connection status (connected/disconnected), session ID, uptime</returns>
-        Task<StatusResponse> GetStatusAsync(CancellationToken ct = default);
+        /// <returns>App state (msg, progress, state, topState)</returns>
+        Task<AppStateResponse> GetStateAsync(CancellationToken ct = default);
     }
 }
 ```
@@ -146,12 +149,48 @@ namespace MixingStation.Client.App
 **DTOs (Data Transfer Objects)**:
 
 ```csharp
-public record MixerInfo
+/// <summary>
+/// GET /app/mixers/current response
+/// OpenAPI schema: blob-ca-d$b
+/// </summary>
+public record AppMixersCurrentResponse
 {
-    public string ConsoleSeries { get; init; }    // "Behringer X32"
-    public string Model { get; init; }            // "X32 Compact"
-    public string FirmwareVersion { get; init; }
-    public string IpAddress { get; init; }
+    public int ConsoleId { get; init; }                      // Mixer series ID
+    public int CurrentModelId { get; init; }                 // Current model ID
+    public string IpAddress { get; init; }                   // Mixer IP address
+    public string Name { get; init; }                        // Mixer series name
+    public string FirmwareVersion { get; init; }             // Firmware version
+    public string CurrentModel { get; init; }                // Current model name
+    public string Manufacturer { get; init; }                // Manufacturer name
+    public string[] Models { get; init; }                    // Available models
+    public string[] SupportedHardwareModels { get; init; }   // Human-readable models
+    public bool CanSearch { get; init; }                     // Can search for mixers
+    public int ManufacturerId { get; init; }                 // Manufacturer ID
+}
+
+/// <summary>
+/// POST /app/mixers/connect request
+/// OpenAPI schema: blob-ca-b
+/// </summary>
+public record AppMixersConnectRequest
+{
+    public int ConsoleId { get; init; }     // Mixer series ID which should be started
+    public string Ip { get; init; }         // IP address or hostname
+}
+
+/// <summary>
+/// GET /app/state response
+/// OpenAPI schema: blob-bw-a
+/// </summary>
+public record AppStateResponse
+{
+    public string Msg { get; init; }        // State message
+    public int Progress { get; init; }      // Progress (0-100)
+    public string State { get; init; }      // Current state
+    public string TopState { get; init; }   // Top-level state
+}
+```
+
 ---
 
 ### MixingStation.Client.Console Namespace (REST Mirror)
