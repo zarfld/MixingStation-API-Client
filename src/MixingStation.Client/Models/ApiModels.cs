@@ -99,6 +99,58 @@ namespace MixingStation.Client.Models
     // ========================================
 
     /// <summary>
+    /// GET /console/information - Response
+    /// OpenAPI Schema: blob-bx-b
+    /// </summary>
+    public record ConsoleInformationResponse
+    {
+        /// <summary>Total number of channels</summary>
+        public int TotalChannels { get; init; }
+        
+        /// <summary>Channel color definitions</summary>
+        public ChannelColor[] ChannelColors { get; init; } = Array.Empty<ChannelColor>();
+        
+        /// <summary>Channel type definitions</summary>
+        public ChannelType[] ChannelTypes { get; init; } = Array.Empty<ChannelType>();
+        
+        /// <summary>RTA frequency points</summary>
+        public float[] RtaFrequencies { get; init; } = Array.Empty<float>();
+        
+        /// <summary>dBFS offset for level meters</summary>
+        public double DbfsOffset { get; init; }
+    }
+
+    /// <summary>
+    /// Channel color definition (blob-bx-b$a sub-schema)
+    /// </summary>
+    public record ChannelColor
+    {
+        /// <summary>Color index/ID</summary>
+        public int Id { get; init; }
+        
+        /// <summary>Color name</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Hex color code (e.g., "#FF5733")</summary>
+        public string Hex { get; init; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Channel type definition (blob-bx-b$c sub-schema)
+    /// </summary>
+    public record ChannelType
+    {
+        /// <summary>Type index/ID</summary>
+        public int Id { get; init; }
+        
+        /// <summary>Type name (e.g., "Input", "Aux", "Bus", "Matrix")</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Number of channels of this type</summary>
+        public int Count { get; init; }
+    }
+
+    /// <summary>
     /// GET /console/data/get/{path}/{format} - Response
     /// OpenAPI Schema: blob-bx-m
     /// </summary>
