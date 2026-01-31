@@ -672,5 +672,115 @@ namespace MixingStation.Client.Console
                 throw new TransportException("Network error during HTTP request", null, ex);
             }
         }
+
+        // ========================================
+        // Phase 6: Console Metering
+        // ========================================
+
+        /// <inheritdoc/>
+        [Obsolete("Use PostMetering2SubscribeAsync instead - /console/metering2/subscribe")]
+        public async Task PostMeteringSubscribeAsync(
+            ConsoleMeteringSubscribeRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, AppClient.JsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(
+                    "/console/metering/subscribe",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - nothing to return
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task PostMeteringUnsubscribeAsync(
+            ConsoleMeteringUnsubscribeRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, AppClient.JsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(
+                    "/console/metering/unsubscribe",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - nothing to return
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task PostMetering2SubscribeAsync(
+            ConsoleMeteringSubscribe2Request request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, AppClient.JsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(
+                    "/console/metering2/subscribe",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - nothing to return
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
     }
 }

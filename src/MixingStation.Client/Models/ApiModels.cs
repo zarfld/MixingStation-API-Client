@@ -525,6 +525,353 @@ namespace MixingStation.Client.Models
     }
 
     // ========================================
+    // Phase 6: Console Metering
+    // ========================================
+
+    /// <summary>
+    /// POST /console/metering/subscribe - Request
+    /// OpenAPI Schema: blob-bw-k
+    /// DEPRECATED: Use ConsoleMeteringSubscribe2Request instead
+    /// Subscribes to metering values of channels (level meters)
+    /// </summary>
+    [Obsolete("Use ConsoleMeteringSubscribe2Request instead - /console/metering2/subscribe")]
+    public record ConsoleMeteringSubscribeRequest
+    {
+        /// <summary>Subscription ID</summary>
+        public int Id { get; init; }
+        
+        /// <summary>Update interval in milliseconds</summary>
+        public int Interval { get; init; }
+        
+        /// <summary>Use binary format (base64 encoded int16 fixed-point)</summary>
+        public bool Binary { get; init; }
+        
+        /// <summary>Channel indices to monitor</summary>
+        public int[] ChannelIndices { get; init; } = Array.Empty<int>();
+    }
+
+    /// <summary>
+    /// POST /console/metering/unsubscribe - Request
+    /// OpenAPI Schema: blob-bw-b
+    /// Unsubscribes the metering request with the given id
+    /// </summary>
+    public record ConsoleMeteringUnsubscribeRequest
+    {
+        /// <summary>Subscription ID to unsubscribe</summary>
+        public int Id { get; init; }
+    }
+
+    /// <summary>
+    /// POST /console/metering2/subscribe - Request
+    /// OpenAPI Schema: blob-bw-l
+    /// Subscribes to metering values (improved API)
+    /// </summary>
+    public record ConsoleMeteringSubscribe2Request
+    {
+        /// <summary>Subscription ID</summary>
+        public int Id { get; init; }
+        
+        /// <summary>Update interval in milliseconds</summary>
+        public int Interval { get; init; }
+        
+        /// <summary>Use binary format (base64 encoded int16 fixed-point)</summary>
+        public bool Binary { get; init; }
+        
+        /// <summary>Metering parameters (channel index and type)</summary>
+        public MeteringParam[] Params { get; init; } = Array.Empty<MeteringParam>();
+    }
+
+    /// <summary>
+    /// Metering parameter for metering2 subscription
+    /// OpenAPI Schema: blob-bw-d
+    /// </summary>
+    public record MeteringParam
+    {
+        /// <summary>Channel or bus index</summary>
+        public int Index { get; init; }
+        
+        /// <summary>Metering type (pre/post fader, etc.)</summary>
+        public int Type { get; init; }
+    }
+
+    // NOTE: All metering endpoints return 204 No Content (NO RESPONSE BODY!)
+
+    // ========================================
+    // Phase 7: App Presets (/app/presets/*)
+    // ========================================
+
+    /// <summary>
+    /// Channel or bus reference
+    /// OpenAPI Schema: blob-wr-a
+    /// Used in: preset channel operations
+    /// </summary>
+    public record ChannelReference
+    {
+        /// <summary>Channel index offset</summary>
+        public int Offset { get; init; }
+        
+        /// <summary>Channel type (input, aux, etc.)</summary>
+        public int Type { get; init; }
+    }
+
+    /// <summary>
+    /// Preset scope definition
+    /// OpenAPI Schema: blob-by-e
+    /// Used in: GET /app/presets/scopes response
+    /// </summary>
+    public record AppPresetsScope
+    {
+        /// <summary>Scope name (e.g., "EQ", "Gate", "Compressor")</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Bit position for this scope</summary>
+        public int BitPos { get; init; }
+    }
+
+    /// <summary>
+    /// GET /app/presets/scopes - Response
+    /// OpenAPI Schema: blob-by-f
+    /// Returns available preset scopes (channel and global)
+    /// </summary>
+    public record AppPresetsScopesResponse
+    {
+        /// <summary>Channel-specific scopes (e.g., channel EQ, gate)</summary>
+        public AppPresetsScope[] Channel { get; init; } = Array.Empty<AppPresetsScope>();
+        
+        /// <summary>Global scopes (e.g., main mix settings)</summary>
+        public AppPresetsScope[] Global { get; init; } = Array.Empty<AppPresetsScope>();
+    }
+
+    /// <summary>
+    /// POST /app/presets/channel/apply - Request
+    /// OpenAPI Schema: blob-by-b
+    /// Recalls the given MS Preset data to a channel
+    /// </summary>
+    public record AppPresetsChannelApplyRequest
+    {
+        /// <summary>Preset data (freeform object)</summary>
+        public object Data { get; init; } = new();
+        
+        /// <summary>Scope bitmask (which settings to apply)</summary>
+        public int Scope { get; init; }
+        
+        /// <summary>Target channel reference</summary>
+        public ChannelReference Channel { get; init; } = new();
+    }
+
+    // NOTE: POST /app/presets/channel/apply returns 204 No Content (NO RESPONSE BODY!)
+
+    /// <summary>
+    /// POST /app/presets/channel/create - Request
+    /// OpenAPI Schema: blob-by-c
+    /// Returns the state of a single channel as MS Preset
+    /// </summary>
+    public record AppPresetsChannelCreateRequest
+    {
+        /// <summary>Source channel reference</summary>
+        public ChannelReference Src { get; init; } = new();
+        
+        /// <summary>Scope bitmask (which settings to capture)</summary>
+        public int Scope { get; init; }
+    }
+
+    /// <summary>
+    /// POST /app/presets/channel/create - Response
+    /// OpenAPI Schema: blob-by-b (same as apply request)
+    /// Returns channel preset data
+    /// </summary>
+    public record AppPresetsChannelCreateResponse
+    {
+        /// <summary>Preset data (freeform object)</summary>
+        public object Data { get; init; } = new();
+        
+        /// <summary>Scope bitmask</summary>
+        public int Scope { get; init; }
+        
+        /// <summary>Source channel reference</summary>
+        public ChannelReference Channel { get; init; } = new();
+    }
+
+    /// <summary>
+    /// Channel scope mapping for scene presets
+    /// OpenAPI Schema: blob-by-a
+    /// Used in: scene preset operations
+    /// </summary>
+    public record ChannelScopeMapping
+    {
+        /// <summary>Source channel reference</summary>
+        public ChannelReference Src { get; init; } = new();
+        
+        /// <summary>Scope bitmask</summary>
+        public int Scope { get; init; }
+        
+        /// <summary>Destination channel reference</summary>
+        public ChannelReference Dest { get; init; } = new();
+    }
+
+    /// <summary>
+    /// POST /app/presets/scenes/apply - Request
+    /// POST /app/presets/scenes/create - Response
+    /// OpenAPI Schema: blob-by-d
+    /// Scene preset data with global and channel scopes
+    /// </summary>
+    public record AppPresetsSceneData
+    {
+        /// <summary>Scene data (freeform object, OpenAPI: blob-bn-c)</summary>
+        public object Data { get; init; } = new();
+        
+        /// <summary>Global scope bitmask</summary>
+        public int GlobalScope { get; init; }
+        
+        /// <summary>Channel scope mappings</summary>
+        public ChannelScopeMapping[] ChannelScopes { get; init; } = Array.Empty<ChannelScopeMapping>();
+    }
+
+    // NOTE: POST /app/presets/scenes/apply returns 204 No Content (NO RESPONSE BODY!)
+    // NOTE: POST /app/presets/scenes/create returns AppPresetsSceneData
+
+    /// <summary>
+    /// GET /app/presets/lastError - Response
+    /// OpenAPI Schema: blob-bx-i
+    /// Returns errors/warnings from last preset recall
+    /// </summary>
+    public record AppPresetsLastErrorResponse
+    {
+        /// <summary>Warning messages</summary>
+        public string[] Warnings { get; init; } = Array.Empty<string>();
+        
+        /// <summary>Error messages</summary>
+        public string[] Errors { get; init; } = Array.Empty<string>();
+    }
+
+    // ========================================
+    // Phase 8: App IDCA & UI (/app/idcas/*, /app/ui/*)
+    // ========================================
+
+    /// <summary>
+    /// POST /app/idcas - Request
+    /// POST /app/idcas/{index} - Request (modify IDCA)
+    /// OpenAPI Schema: blob-bw-e
+    /// Creates or modifies an IDCA (Input/Direct Channel Assignment)
+    /// </summary>
+    public record AppIdcaRequest
+    {
+        /// <summary>IDCA member channel references</summary>
+        public ChannelReference[] Members { get; init; } = Array.Empty<ChannelReference>();
+    }
+
+    /// <summary>
+    /// POST /app/idcas - Response
+    /// POST /app/idcas/{index} - Response (modify IDCA)
+    /// OpenAPI Schema: blob-bw-c
+    /// Returns IDCA with assigned index
+    /// </summary>
+    public record AppIdcaResponse
+    {
+        /// <summary>IDCA member channel references</summary>
+        public ChannelReference[] Members { get; init; } = Array.Empty<ChannelReference>();
+        
+        /// <summary>IDCA index in data tree (appears as 'idca.X')</summary>
+        public int Index { get; init; }
+    }
+
+    /// <summary>
+    /// POST /app/idcas/rearrange - Request
+    /// OpenAPI Schema: blob-bw-h
+    /// Updates IDCA order by source indices
+    /// </summary>
+    public record AppIdcaRearrangeRequest
+    {
+        /// <summary>Source indices of existing IDCAs (new order)</summary>
+        public int[] NewIndices { get; init; } = Array.Empty<int>();
+    }
+
+    /// <summary>
+    /// POST /app/idcas/rearrange - Response
+    /// OpenAPI Schema: blob-bw-c$a
+    /// Returns all IDCAs in new order
+    /// </summary>
+    public record AppIdcaRearrangeResponse
+    {
+        /// <summary>All IDCAs after rearranging</summary>
+        public AppIdcaResponse[] Dcas { get; init; } = Array.Empty<AppIdcaResponse>();
+    }
+
+    // NOTE: POST /app/idcas/{index}/delete returns 204 No Content (NO RESPONSE BODY!)
+
+    /// <summary>
+    /// GET /app/ui/selectedChannel - Response
+    /// GET /app/ui/selectedChannel/{nameOrIndex} - Response
+    /// OpenAPI Schema: blob-bx-a
+    /// Returns currently selected channel info
+    /// </summary>
+    public record AppUiSelectedChannelResponse
+    {
+        /// <summary>Generic channel name (e.g., "Input 1")</summary>
+        public string GenericName { get; init; } = string.Empty;
+        
+        /// <summary>Custom channel name</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Channel index</summary>
+        public int Index { get; init; }
+    }
+
+    // ========================================
+    // Phase 9: App Network & Misc (/app/network/*, /app/save)
+    // ========================================
+
+    /// <summary>
+    /// Network interface information
+    /// OpenAPI Schema: blob-bw-g$a
+    /// </summary>
+    public record NetworkInterface
+    {
+        /// <summary>Human-readable interface name</summary>
+        public string DisplayName { get; init; } = string.Empty;
+        
+        /// <summary>Whether this is the primary interface</summary>
+        public bool IsPrimary { get; init; }
+        
+        /// <summary>System interface name</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>IP address</summary>
+        public string IpAddress { get; init; } = string.Empty;
+        
+        /// <summary>Subnet mask</summary>
+        public string SubnetMask { get; init; } = string.Empty;
+        
+        /// <summary>Whether primary interface is overridden</summary>
+        public bool OverridePrimary { get; init; }
+    }
+
+    /// <summary>
+    /// GET /app/network/interfaces - Response
+    /// POST /app/network/interfaces/primary - Response
+    /// OpenAPI Schema: blob-bw-g
+    /// Returns list of network interfaces
+    /// </summary>
+    public record NetworkInterfacesResponse
+    {
+        /// <summary>All network interfaces</summary>
+        public NetworkInterface[] Interfaces { get; init; } = Array.Empty<NetworkInterface>();
+    }
+
+    /// <summary>
+    /// POST /app/network/interfaces/primary - Request
+    /// OpenAPI Schema: blob-bw-f
+    /// Sets primary network interface
+    /// </summary>
+    public record NetworkInterfacePrimaryRequest
+    {
+        /// <summary>Name of interface to set as primary</summary>
+        public string Name { get; init; } = string.Empty;
+    }
+
+    // NOTE: POST /app/save returns 204 No Content (NO RESPONSE BODY!)
+
+    // ========================================
     // Legacy / Deprecated
     // ========================================
 

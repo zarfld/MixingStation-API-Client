@@ -25,6 +25,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
@@ -463,6 +464,807 @@ namespace MixingStation.Client.App
             catch (OperationCanceledException)
             {
                 // Re-throw cancellation as-is
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        // ========================================
+        // Phase 7: App Presets Management
+        // ========================================
+
+        /// <inheritdoc />
+        public async Task<AppPresetsScopesResponse> GetPresetsScopesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync("/app/presets/scopes", cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /app/presets/scopes",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppPresetsScopesResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from GET /app/presets/scopes",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task PostPresetsChannelApplyAsync(
+            AppPresetsChannelApplyRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    "/app/presets/channel/apply",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/presets/channel/apply",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - success, no response body
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize request: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppPresetsChannelCreateResponse> PostPresetsChannelCreateAsync(
+            AppPresetsChannelCreateRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    "/app/presets/channel/create",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/presets/channel/create",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppPresetsChannelCreateResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from POST /app/presets/channel/create",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize/deserialize: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task PostPresetsScenesApplyAsync(
+            AppPresetsSceneData request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    "/app/presets/scenes/apply",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/presets/scenes/apply",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - success, no response body
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize request: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppPresetsSceneData> PostPresetsScenesCreateAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                // POST with no body (creates scene from current state)
+                var response = await httpClient.PostAsync(
+                    "/app/presets/scenes/create",
+                    new StringContent(string.Empty),
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/presets/scenes/create",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppPresetsSceneData>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from POST /app/presets/scenes/create",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppPresetsLastErrorResponse> GetPresetsLastErrorAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync("/app/presets/lastError", cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /app/presets/lastError",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppPresetsLastErrorResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from GET /app/presets/lastError",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        // ========================================
+        // Phase 8: App IDCA & UI Management
+        // ========================================
+
+        /// <inheritdoc />
+        public async Task<AppIdcaResponse> PostIdcasAsync(
+            AppIdcaRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    "/app/idcas",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/idcas",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppIdcaResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from POST /app/idcas",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize/deserialize: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppIdcaResponse> PostIdcasAsync(
+            string index,
+            AppIdcaRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(index))
+            {
+                throw new ArgumentException("Index cannot be null or empty", nameof(index));
+            }
+
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    $"/app/idcas/{index}",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/idcas/{index}",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppIdcaResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    $"Received null response from POST /app/idcas/{index}",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize/deserialize: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task PostIdcasDeleteAsync(
+            string index,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(index))
+            {
+                throw new ArgumentException("Index cannot be null or empty", nameof(index));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.PostAsync(
+                    $"/app/idcas/{index}/delete",
+                    new StringContent(string.Empty),
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/idcas/{index}/delete",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - success, no response body
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppIdcaRearrangeResponse> PostIdcasRearrangeAsync(
+            AppIdcaRearrangeRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    "/app/idcas/rearrange",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/idcas/rearrange",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppIdcaRearrangeResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from POST /app/idcas/rearrange",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize/deserialize: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppUiSelectedChannelResponse> GetUiSelectedChannelAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync("/app/ui/selectedChannel", cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /app/ui/selectedChannel",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppUiSelectedChannelResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from GET /app/ui/selectedChannel",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppUiSelectedChannelResponse> GetUiSelectedChannelAsync(
+            string nameOrIndex,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(nameOrIndex))
+            {
+                throw new ArgumentException("Name or index cannot be null or empty", nameof(nameOrIndex));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync($"/app/ui/selectedChannel/{nameOrIndex}", cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /app/ui/selectedChannel/{nameOrIndex}",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppUiSelectedChannelResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    $"Received null response from GET /app/ui/selectedChannel/{nameOrIndex}",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        // ========================================
+        // Phase 9: App Network & Misc
+        // ========================================
+
+        /// <inheritdoc/>
+        public async Task<NetworkInterfacesResponse> GetNetworkInterfacesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync("/app/network/interfaces", cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /app/network/interfaces",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<NetworkInterfacesResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from GET /app/network/interfaces",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<NetworkInterfacesResponse> PostNetworkInterfacesPrimaryAsync(
+            NetworkInterfacePrimaryRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var jsonContent = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(jsonContent, System.Text.Encoding.UTF8);
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                var response = await httpClient.PostAsync("/app/network/interfaces/primary", content, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/network/interfaces/primary",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<NetworkInterfacesResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                return result ?? throw new TransportException(
+                    "Received null response from POST /app/network/interfaces/primary",
+                    response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to deserialize response: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task PostSaveAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                // POST /app/save requires empty body
+                var content = new StringContent(string.Empty, System.Text.Encoding.UTF8);
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                var response = await httpClient.PostAsync("/app/save", content, cancellationToken);
+
+                // Expect 204 No Content
+                if (response.StatusCode != HttpStatusCode.NoContent)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/save (expected 204 No Content)",
+                        response.StatusCode);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
                 throw;
             }
             catch (Exception ex)

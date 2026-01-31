@@ -184,5 +184,58 @@ namespace MixingStation.Client.Console
         /// <returns>Mix targets (available signal routing destinations).</returns>
         Task<ConsoleMixTargetsResponse> GetMixTargetsAsync(
             CancellationToken cancellationToken = default);
+
+        // ========================================
+        // Phase 6: Console Metering
+        // ========================================
+
+        /// <summary>
+        /// POST /console/metering/subscribe - Subscribe to metering values of channels.
+        /// DEPRECATED: Use PostMetering2SubscribeAsync instead.
+        /// OpenAPI: Request blob-bw-k (id, interval, binary, channelIndices), Response 204 No Content
+        /// </summary>
+        /// <param name="request">Metering subscription parameters.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        [Obsolete("Use PostMetering2SubscribeAsync instead - /console/metering2/subscribe")]
+        Task PostMeteringSubscribeAsync(
+            ConsoleMeteringSubscribeRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /console/metering/unsubscribe - Unsubscribe metering request.
+        /// OpenAPI: Request blob-bw-b (id), Response 204 No Content
+        /// </summary>
+        /// <param name="request">Unsubscribe parameters (subscription ID).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostMeteringUnsubscribeAsync(
+            ConsoleMeteringUnsubscribeRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /console/metering2/subscribe - Subscribe to metering values (improved API).
+        /// OpenAPI: Request blob-bw-l (id, interval, binary, params), Response 204 No Content
+        /// </summary>
+        /// <param name="request">Metering2 subscription parameters.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostMetering2SubscribeAsync(
+            ConsoleMeteringSubscribe2Request request,
+            CancellationToken cancellationToken = default);
+
+        // ========================================
+        // Phase 10: Console Config Events
+        // ========================================
+
+        /// <summary>
+        /// GET /console/onConfigChanged - WebSocket event for mixer config changes.
+        /// OpenAPI: Response 204 No Content
+        /// Naming: /{group}/{segment} → Get{Segment}Async()
+        /// 
+        /// Note: This is a WebSocket-only endpoint that broadcasts when mixer configuration changes
+        /// (e.g., configurable mono/stereo channel counts). In REST context, returns 204 No Content.
+        /// Full implementation would require WebSocket handling.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task GetOnConfigChangedAsync(
+            CancellationToken cancellationToken = default);
     }
 }

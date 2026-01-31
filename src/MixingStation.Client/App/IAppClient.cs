@@ -119,5 +119,184 @@ namespace MixingStation.Client.App
         Task PostMixersOfflineAsync(
             AppMixersOfflineRequest request,
             CancellationToken cancellationToken = default);
+
+        // ========================================
+        // Phase 7: App Presets Management
+        // ========================================
+
+        /// <summary>
+        /// GET /app/presets/scopes - Returns all available preset scopes (channel/global).
+        /// OpenAPI: Response blob-by-f (channel[], global[])
+        /// Naming: /{group}/{segment1}/{segment2} → Get{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Available scopes for channel and global presets.</returns>
+        Task<AppPresetsScopesResponse> GetPresetsScopesAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/presets/channel/apply - Recalls the given MS Preset data to a channel.
+        /// OpenAPI: Request blob-by-b, Response 204 No Content
+        /// Naming: /{group}/{segment1}/{segment2}/{segment3} → Post{Segment1}{Segment2}{Segment3}Async()
+        /// </summary>
+        /// <param name="request">Preset data (data, scope, channel).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostPresetsChannelApplyAsync(
+            AppPresetsChannelApplyRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/presets/channel/create - Returns the state of a single channel as MS Preset.
+        /// OpenAPI: Request blob-by-c, Response blob-by-b
+        /// Naming: /{group}/{segment1}/{segment2}/{segment3} → Post{Segment1}{Segment2}{Segment3}Async()
+        /// </summary>
+        /// <param name="request">Channel reference and scope (src, scope).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Channel preset data.</returns>
+        Task<AppPresetsChannelCreateResponse> PostPresetsChannelCreateAsync(
+            AppPresetsChannelCreateRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/presets/scenes/apply - Recalls the given MS Scene data.
+        /// OpenAPI: Request blob-by-d, Response 204 No Content
+        /// Naming: /{group}/{segment1}/{segment2}/{segment3} → Post{Segment1}{Segment2}{Segment3}Async()
+        /// </summary>
+        /// <param name="request">Scene data (data, globalScope, channelScopes[]).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostPresetsScenesApplyAsync(
+            AppPresetsSceneData request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/presets/scenes/create - Returns the current mixer state as MS Scene.
+        /// OpenAPI: Response blob-by-d
+        /// Naming: /{group}/{segment1}/{segment2}/{segment3} → Post{Segment1}{Segment2}{Segment3}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Scene preset data.</returns>
+        Task<AppPresetsSceneData> PostPresetsScenesCreateAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /app/presets/lastError - Returns errors/warnings from last preset recall.
+        /// OpenAPI: Response blob-bx-i (warnings[], errors[])
+        /// Naming: /{group}/{segment1}/{segment2} → Get{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Error and warning messages.</returns>
+        Task<AppPresetsLastErrorResponse> GetPresetsLastErrorAsync(
+            CancellationToken cancellationToken = default);
+
+        // ========================================
+        // Phase 8: App IDCA & UI Management
+        // ========================================
+
+        /// <summary>
+        /// POST /app/idcas - Creates a new IDCA (Input/Direct Channel Assignment).
+        /// OpenAPI: Request blob-bw-e, Response blob-bw-c
+        /// Naming: /{group}/{segment1} → Post{Segment1}Async()
+        /// </summary>
+        /// <param name="request">IDCA members (channel references).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Created IDCA with assigned index.</returns>
+        Task<AppIdcaResponse> PostIdcasAsync(
+            AppIdcaRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/idcas/{index} - Modifies an existing IDCA.
+        /// OpenAPI: Request blob-bw-e, Response blob-bw-c
+        /// Naming: /{group}/{segment1}/{param} → Post{Segment1}Async(param, ...)
+        /// </summary>
+        /// <param name="index">IDCA index to modify.</param>
+        /// <param name="request">Updated IDCA members.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Modified IDCA.</returns>
+        Task<AppIdcaResponse> PostIdcasAsync(
+            string index,
+            AppIdcaRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/idcas/{index}/delete - Deletes an IDCA.
+        /// OpenAPI: Response 204 No Content
+        /// Naming: /{group}/{segment1}/{param}/{segment2} → Post{Segment1}{Segment2}Async(param)
+        /// </summary>
+        /// <param name="index">IDCA index to delete.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostIdcasDeleteAsync(
+            string index,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/idcas/rearrange - Updates IDCA order.
+        /// OpenAPI: Request blob-bw-h, Response blob-bw-c$a
+        /// Naming: /{group}/{segment1}/{segment2} → Post{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="request">New order (source indices of existing IDCAs).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>All IDCAs in new order.</returns>
+        Task<AppIdcaRearrangeResponse> PostIdcasRearrangeAsync(
+            AppIdcaRearrangeRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /app/ui/selectedChannel - Returns currently selected channel.
+        /// OpenAPI: Response blob-bx-a (genericName, name, index)
+        /// Naming: /{group}/{segment1}/{segment2} → Get{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Selected channel info.</returns>
+        Task<AppUiSelectedChannelResponse> GetUiSelectedChannelAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /app/ui/selectedChannel/{nameOrIndex} - Sets selected channel by name or index.
+        /// OpenAPI: Response blob-bx-a (genericName, name, index)
+        /// Naming: /{group}/{segment1}/{segment2}/{param} → Get{Segment1}{Segment2}Async(param)
+        /// </summary>
+        /// <param name="nameOrIndex">Channel name or index to select.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Selected channel info.</returns>
+        Task<AppUiSelectedChannelResponse> GetUiSelectedChannelAsync(
+            string nameOrIndex,
+            CancellationToken cancellationToken = default);
+
+        // ========================================
+        // Phase 9: App Network & Misc
+        // ========================================
+
+        /// <summary>
+        /// GET /app/network/interfaces - Returns all network interfaces and their status.
+        /// OpenAPI: Response blob-bw-g (interfaces[])
+        /// Naming: /{group}/{segment1}/{segment2} → Get{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>All network interfaces with their status.</returns>
+        Task<NetworkInterfacesResponse> GetNetworkInterfacesAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/network/interfaces/primary - Overrides primary network interface.
+        /// OpenAPI: Request blob-bw-f (name), Response blob-bw-g (interfaces[])
+        /// Naming: /{group}/{segment1}/{segment2}/{segment3} → Post{Segment1}{Segment2}{Segment3}Async()
+        /// Must be set before starting any search/connection process.
+        /// </summary>
+        /// <param name="request">Interface name to set as primary.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Updated network interfaces status.</returns>
+        Task<NetworkInterfacesResponse> PostNetworkInterfacesPrimaryAsync(
+            NetworkInterfacePrimaryRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/save - Persists all current app settings.
+        /// OpenAPI: Response 204 No Content
+        /// Naming: /{group}/{segment} → Post{Segment}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostSaveAsync(
+            CancellationToken cancellationToken = default);
     }
 }
