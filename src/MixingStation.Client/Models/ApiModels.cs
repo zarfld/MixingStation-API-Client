@@ -164,6 +164,20 @@ namespace MixingStation.Client.Models
     }
 
     /// <summary>
+    /// POST /console/data/subscribe - Request
+    /// POST /console/data/unsubscribe - Request
+    /// OpenAPI Schema: blob-bw-j
+    /// </summary>
+    public record ConsoleDataSubscribeRequest
+    {
+        /// <summary>Console data path pattern (e.g., "ch.*.name", "ch.0.*")</summary>
+        public string Path { get; init; } = string.Empty;
+        
+        /// <summary>Value format: "val" (actual value) or "norm" (normalized 0-1)</summary>
+        public string Format { get; init; } = string.Empty;
+    }
+
+    /// <summary>
     /// PLACEHOLDER: /console/data does NOT exist in OpenAPI spec
     /// TODO Phase 2: Replace with real endpoint after OpenAPI spec analysis
     /// This type exists only to allow compilation of out-of-scope interfaces

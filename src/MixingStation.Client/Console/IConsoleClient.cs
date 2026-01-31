@@ -57,5 +57,32 @@ namespace MixingStation.Client.Console
             string path,
             string format,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /console/data/subscribe - Subscribe to data changes via WebSocket.
+        /// OpenAPI: Request blob-bw-j (path, format), Response 204 No Content
+        /// Naming: /{group}/{segment1}/{segment2} → Post{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="request">Subscription parameters (path pattern, format).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostDataSubscribeAsync(
+            ConsoleDataSubscribeRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /console/data/set/{path}/{format} - Write value to console parameter.
+        /// OpenAPI: Request blob-bx-m (format, value), Response blob-bx-m
+        /// Naming: /{group}/{segment1}/{segment2}/{param1}/{param2} → Post{Segment1}{Segment2}Async(param1, param2, request)
+        /// </summary>
+        /// <param name="path">Console data path (e.g., "ch.0.config.gain", "ch.0.mute").</param>
+        /// <param name="format">Value format: "val" (actual value) or "norm" (normalized 0-1).</param>
+        /// <param name="request">Value to set (format and value).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Confirmed value after set (format and value).</returns>
+        Task<ConsoleDataValue> PostDataSetAsync(
+            string path,
+            string format,
+            ConsoleDataValue request,
+            CancellationToken cancellationToken = default);
     }
 }

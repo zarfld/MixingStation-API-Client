@@ -41,7 +41,11 @@ namespace MixingStation.Client.App
     public class AppClient : IAppClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private static readonly JsonSerializerOptions JsonOptions = new()
+        /// <summary>
+        /// JSON serialization options for API requests/responses.
+        /// Uses camelCase property naming to match REST API.
+        /// </summary>
+        public static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };

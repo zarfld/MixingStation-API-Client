@@ -26,6 +26,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using MixingStation.Client.App;
 using MixingStation.Client.Exceptions;
 using MixingStation.Client.Models;
 
@@ -171,6 +172,91 @@ namespace MixingStation.Client.Console
             catch (Exception ex)
             {
                 throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task PostDataSubscribeAsync(
+            ConsoleDataSubscribeRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(nameof(ConsoleClient));
+                var json = JsonSerializer.Serialize(request, AppClient.JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync("/console/data/subscribe", content, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    throw new TransportException(
+                        $"HTTP request failed with status {response.StatusCode}: {errorBody}",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - nothing to return
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ConsoleDataValue> PostDataSetAsync(
+            string path,
+            string format,
+            ConsoleDataValue request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(path, nameof(path));
+            ArgumentNullException.ThrowIfNull(format, nameof(format));
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient(nameof(ConsoleClient));
+                var json = JsonSerializer.Serialize(request, AppClient.JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync($"/console/data/set/{path}/{format}", content, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    throw new TransportException(
+                        $"HTTP request failed with status {response.StatusCode}: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleDataValue>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
             }
         }
     }
