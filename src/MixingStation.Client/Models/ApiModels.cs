@@ -283,12 +283,30 @@ namespace MixingStation.Client.Models
 
     /// <summary>
     /// GET /console/data/categories - Response
-    /// OpenAPI Schema: blob-bx-c (empty object - dynamic content)
+    /// OpenAPI Schema: blob-bx-c
     /// </summary>
     public record ConsoleDataCategoriesResponse
     {
-        /// <summary>Dynamic categories dictionary (key=category name, value=category data)</summary>
-        public Dictionary<string, object?> Categories { get; init; } = new();
+        /// <summary>Array of category definitions with hierarchical structure</summary>
+        public DataCategory[] Categories { get; init; } = Array.Empty<DataCategory>();
+    }
+
+    /// <summary>
+    /// Data category definition (hierarchical structure)
+    /// </summary>
+    public record DataCategory
+    {
+        /// <summary>Category ID</summary>
+        public int Id { get; init; }
+        
+        /// <summary>Category name</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Category description</summary>
+        public string Description { get; init; } = string.Empty;
+        
+        /// <summary>Child categories (recursive)</summary>
+        public DataCategory[] Children { get; init; } = Array.Empty<DataCategory>();
     }
 
     /// <summary>
