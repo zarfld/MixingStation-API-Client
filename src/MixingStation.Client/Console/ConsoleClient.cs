@@ -529,5 +529,148 @@ namespace MixingStation.Client.Console
                 throw new TransportException("Network error during HTTP request", null, ex);
             }
         }
+
+        // ========================================
+        // Phase 5: Console Authentication & Mix Targets
+        // ========================================
+
+        /// <inheritdoc/>
+        public async Task<ConsoleAuthInfoResponse> GetAuthInfoAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    "/console/auth/info",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleAuthInfoResponse>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ConsoleAuthLoginResponse> PostAuthLoginAsync(
+            ConsoleAuthLoginRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, AppClient.JsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(
+                    "/console/auth/login",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleAuthLoginResponse>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ConsoleMixTargetsResponse> GetMixTargetsAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    "/console/mixTargets",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleMixTargetsResponse>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
     }
 }

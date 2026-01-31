@@ -150,5 +150,39 @@ namespace MixingStation.Client.Console
         /// <param name="cancellationToken">Cancellation token.</param>
         Task PostDataUnsubscribeAsync(
             ConsoleDataSubscribeRequest request,
-            CancellationToken cancellationToken = default);    }
+            CancellationToken cancellationToken = default);
+
+        // ========================================
+        // Phase 5: Console Authentication & Mix Targets
+        // ========================================
+
+        /// <summary>
+        /// GET /console/auth/info - Returns the security details about this mixer.
+        /// OpenAPI: Response blob-bz-c (users array)
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Authentication info (list of valid usernames).</returns>
+        Task<ConsoleAuthInfoResponse> GetAuthInfoAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /console/auth/login - Logs in to the mixer using the given credentials.
+        /// OpenAPI: Request blob-bz-b (user, password), Response blob-bz-a (success)
+        /// </summary>
+        /// <param name="request">Login credentials (username and password).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Login result (success flag).</returns>
+        Task<ConsoleAuthLoginResponse> PostAuthLoginAsync(
+            ConsoleAuthLoginRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /console/mixTargets - Returns all signal sinks which can be used as mix target for the channels.
+        /// OpenAPI: Response blob-bw-i (targets array)
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Mix targets (available signal routing destinations).</returns>
+        Task<ConsoleMixTargetsResponse> GetMixTargetsAsync(
+            CancellationToken cancellationToken = default);
+    }
 }

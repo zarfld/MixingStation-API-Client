@@ -427,6 +427,107 @@ namespace MixingStation.Client.Models
 
     // NOTE: POST /console/data/unsubscribe uses ConsoleDataSubscribeRequest (blob-bw-j) - already defined in Phase 2
 
+    // ========================================
+    // Phase 5: Console Authentication & Mix Targets
+    // ========================================
+
+    /// <summary>
+    /// GET /console/auth/info - Response
+    /// OpenAPI Schema: blob-bz-c
+    /// Returns the security details about this mixer
+    /// </summary>
+    public record ConsoleAuthInfoResponse
+    {
+        /// <summary>Array of valid usernames for authentication</summary>
+        public string[] Users { get; init; } = Array.Empty<string>();
+    }
+
+    /// <summary>
+    /// POST /console/auth/login - Request
+    /// OpenAPI Schema: blob-bz-b
+    /// Logs in to the mixer using the given credentials
+    /// </summary>
+    public record ConsoleAuthLoginRequest
+    {
+        /// <summary>Username</summary>
+        public string User { get; init; } = string.Empty;
+        
+        /// <summary>Password</summary>
+        public string Password { get; init; } = string.Empty;
+    }
+
+    /// <summary>
+    /// POST /console/auth/login - Response
+    /// OpenAPI Schema: blob-bz-a
+    /// </summary>
+    public record ConsoleAuthLoginResponse
+    {
+        /// <summary>Whether login was successful</summary>
+        public bool Success { get; init; }
+    }
+
+    /// <summary>
+    /// GET /console/mixTargets - Response
+    /// OpenAPI Schema: blob-bw-i
+    /// Returns all signal sinks which can be used as mix target for the channels
+    /// </summary>
+    public record ConsoleMixTargetsResponse
+    {
+        /// <summary>List of available mix targets</summary>
+        public MixTarget[] Targets { get; init; } = Array.Empty<MixTarget>();
+    }
+
+    /// <summary>
+    /// Mix target details
+    /// OpenAPI Schema: blob-bw-i$a
+    /// </summary>
+    public record MixTarget
+    {
+        /// <summary>Whether this target is a channel</summary>
+        public bool IsChannel { get; init; }
+        
+        /// <summary>Target name</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Channel type details (if IsChannel is true)</summary>
+        public MixTargetChannelType? ChannelType { get; init; }
+        
+        /// <summary>Target ID</summary>
+        public int Id { get; init; }
+        
+        /// <summary>Channel index (if IsChannel is true)</summary>
+        public int ChannelIndex { get; init; }
+    }
+
+    /// <summary>
+    /// Mix target channel type details
+    /// Nested object within blob-bw-i$a
+    /// </summary>
+    public record MixTargetChannelType
+    {
+        /// <summary>Channel offset</summary>
+        public int Offset { get; init; }
+        
+        /// <summary>Whether this is a stereo channel</summary>
+        public bool Stereo { get; init; }
+        
+        /// <summary>Channel type name</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Number of channels of this type</summary>
+        public int Count { get; init; }
+        
+        /// <summary>Short name for this channel type</summary>
+        public string ShortName { get; init; } = string.Empty;
+        
+        /// <summary>Channel type ID</summary>
+        public int Type { get; init; }
+    }
+
+    // ========================================
+    // Legacy / Deprecated
+    // ========================================
+
     /// <summary>
     /// LEGACY PLACEHOLDER - DO NOT USE
     /// Originally created for out-of-scope endpoint /console/data (does not exist in OpenAPI)
