@@ -64,5 +64,60 @@ namespace MixingStation.Client.App
         /// <returns>Application state (msg, progress 0-100, state, topState).</returns>
         Task<AppStateResponse> GetStateAsync(
             CancellationToken cancellationToken = default);
+
+        // ========================================
+        // Phase 3: Mixer Lifecycle Management
+        // ========================================
+
+        /// <summary>
+        /// GET /app/mixers/available - Returns all supported mixer models.
+        /// OpenAPI: Response blob-ca-d (consoles array)
+        /// Naming: /{group}/{segment1}/{segment2} → Get{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>List of available mixer consoles with models and capabilities.</returns>
+        Task<AppMixersAvailableResponse> GetMixersAvailableAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/mixers/search - Starts searching for mixers of the given variant.
+        /// OpenAPI: Request blob-ca-f (consoleId), Response 204 No Content
+        /// Naming: /{group}/{segment1}/{segment2} → Post{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="request">Search parameters (consoleId).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostMixersSearchAsync(
+            AppMixersSearchRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /app/mixers/searchResults - Returns list of all mixers found in the network.
+        /// OpenAPI: Response blob-ca-e (results array)
+        /// Naming: /{group}/{segment1}/{segment2} → Get{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Search results with found mixers (modelId, ip, name, model, version).</returns>
+        Task<AppMixersSearchResultsResponse> GetMixersSearchResultsAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/mixers/disconnect - Stops the network stack and returns to initial app state.
+        /// OpenAPI: Response 204 No Content
+        /// Naming: /{group}/{segment1}/{segment2} → Post{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostMixersDisconnectAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /app/mixers/offline - Starts offline mode for mixers of the given series and model.
+        /// OpenAPI: Request blob-ca-g (consoleId, modelId, model), Response 204 No Content
+        /// Naming: /{group}/{segment1}/{segment2} → Post{Segment1}{Segment2}Async()
+        /// </summary>
+        /// <param name="request">Offline mode parameters (consoleId, modelId, model).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostMixersOfflineAsync(
+            AppMixersOfflineRequest request,
+            CancellationToken cancellationToken = default);
     }
 }

@@ -206,5 +206,269 @@ namespace MixingStation.Client.App
                 throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
             }
         }
+
+        // ========================================
+        // Phase 3: Mixer Lifecycle Management
+        // ========================================
+
+        /// <inheritdoc />
+        public async Task<AppMixersAvailableResponse> GetMixersAvailableAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    "/app/mixers/available",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /app/mixers/available",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppMixersAvailableResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                if (result == null)
+                {
+                    throw new TransportException("Failed to deserialize response: null result");
+                }
+
+                return result;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new TransportException($"Request timeout: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"JSON deserialization error: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                // Re-throw TransportException as-is
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task PostMixersSearchAsync(
+            AppMixersSearchRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    "/app/mixers/search",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/mixers/search",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - success, no response body
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize request: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                // Re-throw TransportException as-is
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                // Re-throw cancellation as-is
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<AppMixersSearchResultsResponse> GetMixersSearchResultsAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    "/app/mixers/searchResults",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /app/mixers/searchResults",
+                        response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<AppMixersSearchResultsResponse>(
+                    JsonOptions,
+                    cancellationToken);
+
+                if (result == null)
+                {
+                    throw new TransportException("Failed to deserialize response: null result");
+                }
+
+                return result;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new TransportException($"Request timeout: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"JSON deserialization error: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                // Re-throw TransportException as-is
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task PostMixersDisconnectAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.PostAsync(
+                    "/app/mixers/disconnect",
+                    null,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/mixers/disconnect",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - success, no response body
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                // Re-throw TransportException as-is
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                // Re-throw cancellation as-is
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task PostMixersOfflineAsync(
+            AppMixersOfflineRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, JsonOptions);
+                var content = new StringContent(json, System.Text.Encoding.UTF8,
+                    System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+
+                var response = await httpClient.PostAsync(
+                    "/app/mixers/offline",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from POST /app/mixers/offline",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - success, no response body
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new TransportException($"Failed to serialize request: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                // Re-throw TransportException as-is
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                // Re-throw cancellation as-is
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
+            }
+        }
     }
 }

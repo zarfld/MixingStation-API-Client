@@ -95,6 +95,106 @@ namespace MixingStation.Client.Models
     }
 
     // ========================================
+    // Phase 3: Mixer Lifecycle Endpoints
+    // ========================================
+
+    /// <summary>
+    /// GET /app/mixers/available - Response
+    /// OpenAPI Schema: blob-ca-d
+    /// </summary>
+    public record AppMixersAvailableResponse
+    {
+        /// <summary>List of available mixer console series</summary>
+        public MixerConsole[] Consoles { get; init; } = Array.Empty<MixerConsole>();
+    }
+
+    /// <summary>
+    /// Mixer console series details
+    /// OpenAPI Schema: blob-ca-d$a
+    /// </summary>
+    public record MixerConsole
+    {
+        /// <summary>ID of this mixer series</summary>
+        public int ConsoleId { get; init; }
+        
+        /// <summary>Available models for this series</summary>
+        public string[] Models { get; init; } = Array.Empty<string>();
+        
+        /// <summary>Human-readable list of supported mixer models</summary>
+        public string[] SupportedHardwareModels { get; init; } = Array.Empty<string>();
+        
+        /// <summary>Manufacturer ID</summary>
+        public int ManufacturerId { get; init; }
+        
+        /// <summary>Mixer series name</summary>
+        public string Name { get; init; } = string.Empty;
+    }
+
+    /// <summary>
+    /// POST /app/mixers/search - Request
+    /// OpenAPI Schema: blob-ca-f
+    /// </summary>
+    public record AppMixersSearchRequest
+    {
+        /// <summary>Mixer series ID to search for</summary>
+        public int ConsoleId { get; init; }
+    }
+
+    // NOTE: POST /app/mixers/search returns 204 No Content (NO RESPONSE BODY!)
+
+    /// <summary>
+    /// GET /app/mixers/searchResults - Response
+    /// OpenAPI Schema: blob-ca-e
+    /// </summary>
+    public record AppMixersSearchResultsResponse
+    {
+        /// <summary>List of found mixers</summary>
+        public MixerSearchResult[] Results { get; init; } = Array.Empty<MixerSearchResult>();
+    }
+
+    /// <summary>
+    /// Individual mixer search result
+    /// OpenAPI Schema: blob-ca-e$a
+    /// </summary>
+    public record MixerSearchResult
+    {
+        /// <summary>Model ID</summary>
+        public int ModelId { get; init; }
+        
+        /// <summary>IP address</summary>
+        public string Ip { get; init; } = string.Empty;
+        
+        /// <summary>Mixer name</summary>
+        public string Name { get; init; } = string.Empty;
+        
+        /// <summary>Model name</summary>
+        public string Model { get; init; } = string.Empty;
+        
+        /// <summary>Firmware version</summary>
+        public string Version { get; init; } = string.Empty;
+    }
+
+    // NOTE: POST /app/mixers/disconnect returns 204 No Content (NO REQUEST/RESPONSE BODY!)
+
+    /// <summary>
+    /// POST /app/mixers/offline - Request
+    /// OpenAPI Schema: blob-ca-g
+    /// </summary>
+    public record AppMixersOfflineRequest
+    {
+        /// <summary>Mixer series ID for offline mode</summary>
+        public int ConsoleId { get; init; }
+        
+        /// <summary>Model ID for offline mode</summary>
+        public int ModelId { get; init; }
+        
+        /// <summary>Model name</summary>
+        public string Model { get; init; } = string.Empty;
+    }
+
+    // NOTE: POST /app/mixers/offline returns 204 No Content (NO RESPONSE BODY!)
+
+    // ========================================
     // /console/* Endpoints (Console Data)
     // ========================================
 
@@ -178,13 +278,15 @@ namespace MixingStation.Client.Models
     }
 
     /// <summary>
-    /// PLACEHOLDER: /console/data does NOT exist in OpenAPI spec
-    /// TODO Phase 2: Replace with real endpoint after OpenAPI spec analysis
-    /// This type exists only to allow compilation of out-of-scope interfaces
+    /// LEGACY PLACEHOLDER - DO NOT USE
+    /// Originally created for out-of-scope endpoint /console/data (does not exist in OpenAPI)
+    /// Phase 2 implemented real endpoints: /console/data/subscribe, /console/data/set
+    /// This type exists only for backward compatibility
     /// </summary>
+    [Obsolete("Use ConsoleDataValue or ConsoleDataSubscribeRequest instead")]
     public record ConsoleDataResponse
     {
-        // Placeholder - real schema TBD in Phase 2
+        // Placeholder - not used in actual implementation
     }
 
     // ========================================
