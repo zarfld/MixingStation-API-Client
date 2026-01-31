@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -780,6 +781,46 @@ namespace MixingStation.Client.Console
             catch (HttpRequestException ex)
             {
                 throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        // ========================================
+        // Phase 10: Console Config Events
+        // ========================================
+
+        /// <inheritdoc/>
+        public async Task GetOnConfigChangedAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync("/console/onConfigChanged", cancellationToken);
+
+                // Expect 204 No Content (WebSocket event endpoint in REST mode)
+                if (response.StatusCode != HttpStatusCode.NoContent)
+                {
+                    throw new TransportException(
+                        $"HTTP {(int)response.StatusCode} error from GET /console/onConfigChanged (expected 204 No Content)",
+                        response.StatusCode);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException($"Network error: {ex.Message}", null, ex);
+            }
+            catch (TransportException)
+            {
+                throw;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new TransportException($"Unexpected error: {ex.Message}", null, ex);
             }
         }
     }
