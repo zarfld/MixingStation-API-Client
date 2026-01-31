@@ -23,6 +23,7 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -253,6 +254,275 @@ namespace MixingStation.Client.Console
                         response.StatusCode,
                         ex);
                 }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        // ========================================
+        // Phase 4: Console Data Discovery
+        // ========================================
+
+        /// <inheritdoc/>
+        public async Task<ConsoleDataCategoriesResponse> GetDataCategoriesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    $"/console/data/categories",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleDataCategoriesResponse>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ConsoleDataPathsResponse> GetDataPathsAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    $"/console/data/paths",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleDataPathsResponse>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ConsoleDataPathsResponse> GetDataPathsAsync(
+            string path,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(path, nameof(path));
+            
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    $"/console/data/paths/{Uri.EscapeDataString(path)}",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleDataPathsResponse>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        [Obsolete("Use GetDataDefinitions2Async instead - /console/data/definitions2/{path}")]
+        public async Task<ConsoleDataDefinitionsResponse> GetDataDefinitionsAsync(
+            string path,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(path, nameof(path));
+            
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    $"/console/data/definitions/{Uri.EscapeDataString(path)}",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleDataDefinitionsResponse>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ConsoleDataDefinitions2Response> GetDataDefinitions2Async(
+            string path,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(path, nameof(path));
+            
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(
+                    $"/console/data/definitions2/{Uri.EscapeDataString(path)}",
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                try
+                {
+                    var result = JsonSerializer.Deserialize<ConsoleDataDefinitions2Response>(responseBody, AppClient.JsonOptions);
+                    if (result == null)
+                    {
+                        throw new TransportException("Failed to deserialize response: result was null", response.StatusCode);
+                    }
+                    return result;
+                }
+                catch (JsonException ex)
+                {
+                    throw new TransportException(
+                        $"Failed to deserialize response: {ex.Message}",
+                        response.StatusCode,
+                        ex);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new TransportException("Network error during HTTP request", null, ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task PostDataUnsubscribeAsync(
+            ConsoleDataSubscribeRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+            
+            var httpClient = _httpClientFactory.CreateClient();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(request, AppClient.JsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(
+                    "/console/data/unsubscribe",
+                    content,
+                    cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    throw new TransportException(
+                        $"HTTP request failed: {response.ReasonPhrase}. Response: {errorBody}",
+                        response.StatusCode);
+                }
+
+                // 204 No Content - nothing to return
             }
             catch (HttpRequestException ex)
             {

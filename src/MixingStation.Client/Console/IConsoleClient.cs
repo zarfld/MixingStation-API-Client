@@ -84,5 +84,71 @@ namespace MixingStation.Client.Console
             string format,
             ConsoleDataValue request,
             CancellationToken cancellationToken = default);
-    }
+        // ========================================
+        // Phase 4: Console Data Discovery
+        // ========================================
+
+        /// <summary>
+        /// GET /console/data/categories - Returns all data categories.
+        /// OpenAPI: Response blob-bx-c (empty object - dynamic content)
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Categories dictionary (dynamic key-value pairs).</returns>
+        Task<ConsoleDataCategoriesResponse> GetDataCategoriesAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /console/data/paths - Returns all data paths available for the current mixer.
+        /// OpenAPI: Response blob-bx-f (recursive structure: val array + child dictionary)
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Root data paths tree (recursive structure).</returns>
+        Task<ConsoleDataPathsResponse> GetDataPathsAsync(
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /console/data/paths/{path} - Returns a sub-path.
+        /// OpenAPI: Response blob-bx-f (recursive structure: val array + child dictionary)
+        /// </summary>
+        /// <param name="path">Console data path (e.g., "ch", "ch.0").</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Sub-path tree (recursive structure).</returns>
+        Task<ConsoleDataPathsResponse> GetDataPathsAsync(
+            string path,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /console/data/definitions/{path} - Returns the data definitions for the given path.
+        /// DEPRECATED: Use GetDataDefinitions2Async instead.
+        /// OpenAPI: Response blob-bx-d (definitions dictionary)
+        /// </summary>
+        /// <param name="path">Console data path (e.g., "ch.0.config.gain").</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Data definitions dictionary.</returns>
+        [Obsolete("Use GetDataDefinitions2Async instead - /console/data/definitions2/{path}")]
+        Task<ConsoleDataDefinitionsResponse> GetDataDefinitionsAsync(
+            string path,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// GET /console/data/definitions2/{path} - Returns the data definitions for the given paths.
+        /// OpenAPI: Response blob-bx-e (node + value details)
+        /// </summary>
+        /// <param name="path">Console data path (e.g., "ch.0.config.gain").</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Data definitions (node and value details).</returns>
+        Task<ConsoleDataDefinitions2Response> GetDataDefinitions2Async(
+            string path,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// POST /console/data/unsubscribe - Unsubscribes the data matching the given pattern.
+        /// OpenAPI: Request blob-bw-j (path, format), Response 204 No Content
+        /// WebSocket-Only: This endpoint only works after WebSocket connection is established.
+        /// </summary>
+        /// <param name="request">Unsubscribe parameters (path pattern, format).</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        Task PostDataUnsubscribeAsync(
+            ConsoleDataSubscribeRequest request,
+            CancellationToken cancellationToken = default);    }
 }

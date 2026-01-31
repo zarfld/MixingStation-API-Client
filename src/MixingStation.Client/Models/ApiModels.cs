@@ -277,6 +277,156 @@ namespace MixingStation.Client.Models
         public string Format { get; init; } = string.Empty;
     }
 
+    // ========================================
+    // Phase 4: Console Data Discovery
+    // ========================================
+
+    /// <summary>
+    /// GET /console/data/categories - Response
+    /// OpenAPI Schema: blob-bx-c (empty object - dynamic content)
+    /// </summary>
+    public record ConsoleDataCategoriesResponse
+    {
+        /// <summary>Dynamic categories dictionary (key=category name, value=category data)</summary>
+        public Dictionary<string, object?> Categories { get; init; } = new();
+    }
+
+    /// <summary>
+    /// GET /console/data/paths - Response
+    /// GET /console/data/paths/{path} - Response
+    /// OpenAPI Schema: blob-bx-f
+    /// </summary>
+    public record ConsoleDataPathsResponse
+    {
+        /// <summary>Values at this path level</summary>
+        public string[] Val { get; init; } = Array.Empty<string>();
+        
+        /// <summary>Child paths (recursive structure)</summary>
+        public Dictionary<string, ConsoleDataPathsResponse> Child { get; init; } = new();
+    }
+
+    /// <summary>
+    /// GET /console/data/definitions/{path} - Response (DEPRECATED)
+    /// OpenAPI Schema: blob-bx-d
+    /// </summary>
+    [Obsolete("Use GetDataDefinitions2Async instead - /console/data/definitions2/{path}")]
+    public record ConsoleDataDefinitionsResponse
+    {
+        /// <summary>Data definitions dictionary</summary>
+        public Dictionary<string, ConsoleDataPathDefinition> Definitions { get; init; } = new();
+    }
+
+    /// <summary>
+    /// Individual path definition (blob-bx-l sub-schema)
+    /// </summary>
+    public record ConsoleDataPathDefinition
+    {
+        /// <summary>Data path</summary>
+        public string Path { get; init; } = string.Empty;
+        
+        /// <summary>Value definition details</summary>
+        public DataValueDefinition? Definition { get; init; }
+        
+        /// <summary>String constraints (if value is string type)</summary>
+        public string[] Constraints { get; init; } = Array.Empty<string>();
+    }
+
+    /// <summary>
+    /// Value definition details (blob-bx-l$definition sub-schema)
+    /// </summary>
+    public record DataValueDefinition
+    {
+        /// <summary>Accepted enums (for enum type)</summary>
+        public EnumValue[] Enums { get; init; } = Array.Empty<EnumValue>();
+        
+        /// <summary>Value unit (e.g., "dB", "Hz")</summary>
+        public string Unit { get; init; } = string.Empty;
+        
+        /// <summary>True if value is tappable</summary>
+        public bool Tap { get; init; }
+        
+        /// <summary>Minimum value</summary>
+        public double Min { get; init; }
+        
+        /// <summary>Maximum value</summary>
+        public double Max { get; init; }
+        
+        /// <summary>Minimum delta value accepted (normalized)</summary>
+        public double Delta { get; init; }
+        
+        /// <summary>Value type (float/integer/boolean/string/enum)</summary>
+        public string Type { get; init; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Enum value (blob-bg-b sub-schema)
+    /// </summary>
+    public record EnumValue
+    {
+        /// <summary>Enum ID</summary>
+        public int Id { get; init; }
+        
+        /// <summary>Enum name/label</summary>
+        public string Name { get; init; } = string.Empty;
+    }
+
+    /// <summary>
+    /// GET /console/data/definitions2/{path} - Response
+    /// OpenAPI Schema: blob-bx-e
+    /// </summary>
+    public record ConsoleDataDefinitions2Response
+    {
+        /// <summary>Node details</summary>
+        public DataNodeDetails? Node { get; init; }
+        
+        /// <summary>Value details</summary>
+        public DataValueDetails? Value { get; init; }
+    }
+
+    /// <summary>
+    /// Node details (blob-bx-e$node sub-schema)
+    /// </summary>
+    public record DataNodeDetails
+    {
+        /// <summary>Default filter type</summary>
+        public int DefaultFilterType { get; init; }
+    }
+
+    /// <summary>
+    /// Value details (blob-bx-e$value sub-schema)
+    /// </summary>
+    public record DataValueDetails
+    {
+        /// <summary>Accepted enums (for enum type)</summary>
+        public EnumValue[] Enums { get; init; } = Array.Empty<EnumValue>();
+        
+        /// <summary>Value unit (e.g., "dB", "Hz")</summary>
+        public string Unit { get; init; } = string.Empty;
+        
+        /// <summary>True if value is tappable</summary>
+        public bool Tap { get; init; }
+        
+        /// <summary>Minimum value</summary>
+        public double Min { get; init; }
+        
+        /// <summary>Maximum value</summary>
+        public double Max { get; init; }
+        
+        /// <summary>Minimum delta value accepted (normalized)</summary>
+        public double Delta { get; init; }
+        
+        /// <summary>Value title</summary>
+        public string Title { get; init; } = string.Empty;
+        
+        /// <summary>Value type (float/integer/boolean/string/enum)</summary>
+        public string Type { get; init; } = string.Empty;
+        
+        /// <summary>String constraints (if value is string type)</summary>
+        public string[] Constraints { get; init; } = Array.Empty<string>();
+    }
+
+    // NOTE: POST /console/data/unsubscribe uses ConsoleDataSubscribeRequest (blob-bw-j) - already defined in Phase 2
+
     /// <summary>
     /// LEGACY PLACEHOLDER - DO NOT USE
     /// Originally created for out-of-scope endpoint /console/data (does not exist in OpenAPI)
