@@ -4,7 +4,7 @@ on:
     pull_request:
         paths:
             - "src/MixingStation.Client/**"
-            - "openapi.json"
+            - "docs/openapi.json"
             - "scripts/validate-api-naming.py"
     push:
         branches:
@@ -42,7 +42,7 @@ jobs:
             - name: Validate API Naming Policy
               run: |
                   python scripts/validate-api-naming.py \
-                    --openapi openapi.json \
+                    --openapi docs/openapi.json \
                     --assembly src/MixingStation.Client/bin/Release/net8.0/MixingStation.Client.dll
               continue-on-error: false
 
