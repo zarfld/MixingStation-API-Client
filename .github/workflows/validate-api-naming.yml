@@ -12,7 +12,7 @@ on:
             - main
         paths:
             - "src/MixingStation.Client/**"
-            - "openapi.json"
+            - "docs/openapi.json"
 
 jobs:
     validate-naming:
