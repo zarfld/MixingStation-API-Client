@@ -1247,11 +1247,11 @@ namespace MixingStation.Client.App
 
                 var response = await httpClient.PostAsync("/app/save", content, cancellationToken);
 
-                // Expect 204 No Content
-                if (response.StatusCode != HttpStatusCode.NoContent)
+                // Accept both 200 OK and 204 No Content (server may return either)
+                if (!response.IsSuccessStatusCode)
                 {
                     throw new TransportException(
-                        $"HTTP {(int)response.StatusCode} error from POST /app/save (expected 204 No Content)",
+                        $"HTTP {(int)response.StatusCode} error from POST /app/save",
                         response.StatusCode);
                 }
             }

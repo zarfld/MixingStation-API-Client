@@ -6,6 +6,7 @@
  */
 
 using FluentAssertions;
+using MixingStation.Client.Exceptions;
 using Xunit;
 
 namespace MixingStation.Client.IntegrationTests.App
@@ -30,29 +31,6 @@ namespace MixingStation.Client.IntegrationTests.App
         }
 
         [Fact]
-        public async Task PostMixersSearchAsync_StartsSearch()
-        {
-            // Arrange
-            await RequireServerAsync();
-            
-            // Get available mixers first to get valid ConsoleId
-            var available = await AppClient.GetMixersAvailableAsync();
-            if (available.Consoles == null || available.Consoles.Length == 0)
-            {
-                Assert.True(false, "SKIPPED: No mixer types available for search");
-            }
-
-            var request = new MixingStation.Client.Models.AppMixersSearchRequest
-            {
-                ConsoleId = available.Consoles[0].ConsoleId
-            };
-
-            // Act & Assert
-            // Should not throw - starts background search
-            await AppClient.PostMixersSearchAsync(request);
-        }
-
-        [Fact]
         public async Task GetMixersSearchResultsAsync_ReturnsResults()
         {
             // Arrange
@@ -65,41 +43,8 @@ namespace MixingStation.Client.IntegrationTests.App
             result.Should().NotBeNull();
             result.Results.Should().NotBeNull();
         }
-
-        [Fact]
-        public async Task PostMixersDisconnectAsync_Succeeds()
-        {
-            // Arrange
-            await RequireServerAsync();
-
-            // Act & Assert
-            // Should not throw even if no mixer connected
-            await AppClient.PostMixersDisconnectAsync();
-        }
-
-        [Fact]
-        public async Task PostMixersOfflineAsync_WithMixerId_Succeeds()
-        {
-            // Arrange
-            await RequireServerAsync();
-            
-            // Get available mixers first to get valid ConsoleId and ModelId
-            var available = await AppClient.GetMixersAvailableAsync();
-            if (available.Consoles == null || available.Consoles.Length == 0)
-            {
-                Assert.True(false, "SKIPPED: No mixer types available for offline mode");
-            }
-
-            var console = available.Consoles[0];
-            var request = new MixingStation.Client.Models.AppMixersOfflineRequest
-            {
-                ConsoleId = console.ConsoleId,
-                ModelId = console.Models?.Length > 0 ? 0 : 0, // Use first model if available
-                Model = console.Models?.Length > 0 ? console.Models[0] : ""
-            };
-
-            // Act & Assert
-            await AppClient.PostMixersOfflineAsync(request);
-        }
+        
+        // NOTE: Disconnect/Search/Offline tests moved to AppClientDisconnectIntegrationTests.cs
+        // to ensure they run LAST and don't break connection-dependent tests
     }
 }

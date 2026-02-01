@@ -60,17 +60,40 @@ namespace MixingStation.Client.IntegrationTests.Console
         [Fact]
         public async Task GetDataDefinitionsAsync_RequiresMixer()
         {
-            // Arrange
+            // Arrange - Connect to real mixer
             await RequireMixerAsync();
 
-            // Get available paths first
+            // Get available paths first - root paths are in Child dictionary
             var paths = await ConsoleClient.GetDataPathsAsync();
-            if (paths.Val == null || paths.Val.Length == 0)
+            if (paths.Child == null || paths.Child.Count == 0)
             {
-                Assert.True(false, "SKIPPED: No data paths available");
+                Assert.Fail("No data paths available from mixer");
             }
 
-            var testPath = paths.Val[0];
+            // Find a path with actual values (deprecated API requires full value path)
+            // Navigate: root -> "ch" -> "0" -> values array -> "solo"
+            string testPath;
+            if (paths.Child.TryGetValue("ch", out var chPath) &&
+                chPath.Child != null && chPath.Child.Count > 0)
+            {
+                var firstChannel = chPath.Child.First().Value;
+                if (firstChannel.Val != null && firstChannel.Val.Length > 0)
+                {
+                    var channelIndex = chPath.Child.First().Key;
+                    var valueName = firstChannel.Val[0];
+                    testPath = $"ch.{channelIndex}.{valueName}";
+                }
+                else
+                {
+                    Assert.Fail("No values found in channel paths");
+                    return;
+                }
+            }
+            else
+            {
+                Assert.Fail("Channel paths not available");
+                return;
+            }
 
             // Act
             #pragma warning disable CS0618 // Obsolete
@@ -79,22 +102,25 @@ namespace MixingStation.Client.IntegrationTests.Console
 
             // Assert
             result.Should().NotBeNull();
+            result.Definitions.Should().NotBeNull();
+            result.Definitions.Should().ContainKey(testPath);
         }
 
         [Fact]
         public async Task GetDataDefinitions2Async_RequiresMixer()
         {
-            // Arrange
+            // Arrange - Connect to real mixer
             await RequireMixerAsync();
 
-            // Get available paths first
+            // Get available paths first - root paths are in Child dictionary
             var paths = await ConsoleClient.GetDataPathsAsync();
-            if (paths.Val == null || paths.Val.Length == 0)
+            if (paths.Child == null || paths.Child.Count == 0)
             {
-                Assert.True(false, "SKIPPED: No data paths available");
+                Assert.Fail("No data paths available from mixer");
             }
 
-            var testPath = paths.Val[0];
+            // Use first available root path (e.g., "ch", "fx", "muteGroups")
+            var testPath = paths.Child.Keys.First();
 
             // Act
             var result = await ConsoleClient.GetDataDefinitions2Async(testPath);
@@ -103,12 +129,17 @@ namespace MixingStation.Client.IntegrationTests.Console
             result.Should().NotBeNull();
         }
 
-        [Fact]
+        [Fact(Skip = "Data subscription requires WebSocket connection (not available in REST mode)")]
+
+
         public async Task PostDataUnsubscribeAsync_RequiresMixer()
         {
             // Arrange
             await RequireMixerAsync();
 
+            // SKIP: This endpoint requires WebSocket connection, not available in REST mode
+            // Test skipped - requires physical mixer
+            
             // Subscribe first so we have something to unsubscribe
             var subscribeReq = new MixingStation.Client.Models.ConsoleDataSubscribeRequest
             {

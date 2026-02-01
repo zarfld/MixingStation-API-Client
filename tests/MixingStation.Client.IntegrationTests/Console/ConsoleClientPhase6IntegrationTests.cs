@@ -14,31 +14,22 @@ namespace MixingStation.Client.IntegrationTests.Console
     [Trait("Phase", "6")]
     public class ConsoleClientPhase6IntegrationTests : IntegrationTestBase
     {
-        [Fact]
+        [Fact(Skip = "Metering subscription requires WebSocket for data delivery (not available in REST-only mode)")]
         public async Task PostMeteringSubscribeAsync_RequiresMixer()
         {
-            // Arrange
-            await RequireServerAsync();
-
-            Assert.True(false, "SKIPPED: Skipped - metering subscription requires connected mixer");
+            await Task.CompletedTask;
         }
 
-        [Fact]
+        [Fact(Skip = "Metering unsubscription requires WebSocket (not available in REST-only mode)")]
         public async Task PostMeteringUnsubscribeAsync_RequiresMixer()
         {
-            // Arrange
-            await RequireServerAsync();
-
-            Assert.True(false, "SKIPPED: Skipped - metering operations require connected mixer");
+            await Task.CompletedTask;
         }
 
-        [Fact]
+        [Fact(Skip = "Metering2 subscription requires WebSocket for data delivery (not available in REST-only mode)")]
         public async Task PostMetering2SubscribeAsync_RequiresMixer()
         {
-            // Arrange
-            await RequireServerAsync();
-
-            Assert.True(false, "SKIPPED: Skipped - metering2 subscription requires connected mixer");
+            await Task.CompletedTask;
         }
     }
 }
